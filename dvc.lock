@@ -1,0 +1,37 @@
+schema: '2.0'
+stages:
+  get-data:
+    cmd: python src/get_data.py --output_folder data
+    deps:
+    - path: src/get_data.py
+      md5: 424587772c83ce63e3202892ad02ae74
+      size: 1689
+    params:
+      params.yaml:
+        labels:
+        - Comida
+        - Hobby
+        - Libro
+        repo: daavoo/dataset-comida-hobby-libro
+        since: 2021/11/15
+        state: open
+        until: 2021/11/18
+    outs:
+    - path: data
+      md5: 7d5edfc9e070f49ab758c08623642f66.dir
+      size: 11674
+      nfiles: 15
+  data-metrics:
+    cmd: python src/compute_metrics.py --input_folder data --output_metrics_file data.json
+    deps:
+    - path: data
+      md5: 7d5edfc9e070f49ab758c08623642f66.dir
+      size: 11674
+      nfiles: 15
+    - path: src/compute_metrics.py
+      md5: 9671e9a9acd295ae91e2fbafb2623d6e
+      size: 538
+    outs:
+    - path: data.json
+      md5: 8ee7cf2996d3b5120b6f117518290b5d
+      size: 51

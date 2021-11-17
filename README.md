@@ -183,11 +183,11 @@ stages:
       - ${data_folder}
   
   data-metrics:
-    cmd: python src/data_metrics.py
+    cmd: python src/compute_metrics.py
       --input_folder ${data_folder}
       --output_metrics_file ${metrics_file}
     deps:
-      - src/data_metrics.py
+      - src/compute_metrics.py
       - ${data_folder}
     metrics:
       - ${metrics_file}:
@@ -197,3 +197,13 @@ stages:
 </details>
 
 ---
+
+## Manually Run Pipeline
+
+```
+dvc repro
+```
+
+```
+dvc push myremote
+```
