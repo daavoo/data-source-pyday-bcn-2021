@@ -1,0 +1,11 @@
+repo: daavoo/dataset-comida-hobby-libro
+labels: 
+  - Comida
+  - Hobby
+  - Libro
+state: open
+since: 2021/11/15
+until: 2021/11/18
+
+data_folder: data
+metrics_file: data.json
