@@ -15,23 +15,23 @@ stages:
         repo: daavoo/dataset-comida-hobby-libro
         since: 2021/11/15
         state: open
-        until: 2021/11/18
+        until: 2021/11/19
     outs:
     - path: data
-      md5: 7d5edfc9e070f49ab758c08623642f66.dir
-      size: 11674
-      nfiles: 15
+      md5: 0c99def4d88ec4b79f140b95aa8f3fd4.dir
+      size: 12297
+      nfiles: 16
   data-metrics:
     cmd: python src/compute_metrics.py --input_folder data --output_metrics_file data.json
     deps:
     - path: data
-      md5: 7d5edfc9e070f49ab758c08623642f66.dir
-      size: 11674
-      nfiles: 15
+      md5: 0c99def4d88ec4b79f140b95aa8f3fd4.dir
+      size: 12297
+      nfiles: 16
     - path: src/compute_metrics.py
       md5: 9671e9a9acd295ae91e2fbafb2623d6e
       size: 538
     outs:
     - path: data.json
-      md5: 8ee7cf2996d3b5120b6f117518290b5d
+      md5: fec53081f214ea871a4a8585d6c7fc6b
       size: 51
