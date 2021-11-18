@@ -198,7 +198,12 @@ stages:
 
 ---
 
-## Manually Run Pipeline
+## (Optional) Manually Run Pipeline
+
+<details>
+<summary>Open Github Codespaces</summary>
+
+</details>
 
 ```
 dvc repro
@@ -207,3 +212,158 @@ dvc repro
 ```
 dvc push myremote
 ```
+
+---
+
+## Set Up On P.R. Workflow
+
+
+<details>
+<summary>Create `secrets.GDRIVE_CREDENTIALS_DATA`</summary>
+
+- Get the content:
+https://dvc.org/doc/user-guide/setup-google-drive-remote#authorization
+
+- Add new secret:
+https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository
+</details>
+
+<details>
+<summary>Create `on_pr.yml`</summary>
+
+```yaml
+name: DVC & CML Workflow on P.R.
+
+on:
+  pull_request:
+    branches: [ main ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: docker://ghcr.io/iterative/cml:latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0 # Importante
+
+      - name: Setup
+        env:
+          GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+        run: |
+          pip install -r requirements.txt
+          dvc pull
+
+      - name: Run DVC pipeline
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          dvc exp run
+
+      - name: Push changes
+        env:
+          GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+        run: |
+          dvc push
+
+      - name: CML PR 
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # https://cml.dev/doc/ref/pr
+          cml pr "data.*" "dvc.lock" "params.yaml"
+
+      - name: CML Report
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## Metrics & Params" >> report.md
+          dvc exp diff main --old --show-md >> report.md
+          # https://cml.dev/doc/ref/send-comment
+          cml send-comment --pr --update report.md
+```
+
+</details>
+
+---
+
+## Run Pipeline from Studio
+
+- Access studio view
+
+https://dvc.org/doc/studio/get-started
+
+- Run the pipeline editing the params
+
+https://dvc.org/doc/studio/user-guide/run-experiments
+
+---
+
+## Set Up Weekly Workflow
+
+
+<details>
+<summary>Create `weekly.yml`</summary>
+
+```yaml
+name: DVC & CML Weekly Workflow
+
+on:
+  schedule:
+    - cron: "0 0 * * 0"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    container: docker://ghcr.io/iterative/cml:latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Setup
+        env:
+          GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+        run: |
+          pip install -r requirements.txt
+          dvc pull
+
+      - name: Run DVC pipeline
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # https://dvc.org/doc/command-reference/exp/run#example-modify-parameters-on-the-fly
+          dvc exp run -S until=$(date +'%Y/%m/%d')
+
+      - name: Push changes
+        env:
+          GDRIVE_CREDENTIALS_DATA: ${{ secrets.GDRIVE_CREDENTIALS_DATA }}
+        run: |
+          dvc push
+
+      - name: CML PR 
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # https://cml.dev/doc/ref/pr
+          cml pr "data.*" "dvc.lock" "params.yaml"
+
+      - name: CML Report
+        env:
+          REPO_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "## Metrics & Params" >> report.md
+          dvc exp diff main --old --show-md >> report.md
+          # https://cml.dev/doc/ref/send-comment
+          cml send-comment --pr --update --commit-sha=HEAD report.md
+```
+
+</details>
