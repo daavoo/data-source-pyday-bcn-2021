@@ -12,4 +12,4 @@ jobs:
         model: ["ghcr.io/daavoo/model-pyday-bcn-2021:solution"]
     steps:
       - name: Model Predict
-        run: docker run ${{ matrix.model }} ${{ github.event.issue.title }} ${{ github.event.issue.body }}
+        run: docker run ${{ matrix.model }} "${{ github.event.issue.title }}" "${{ github.event.issue.body }}"
